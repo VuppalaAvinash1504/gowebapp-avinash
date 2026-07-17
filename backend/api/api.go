@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +22,9 @@ var db *sql.DB
 var err error
 
 func SetupPostgres() {
-	// db, err = sql.Open("postgres", "postgres://postgres:password@postgres/todo?sslmode=disable")
-
-	// when running locally
-	db, err = sql.Open("postgres", "postgres://postgres:password@localhost/todo?sslmode=disable")
+	// Connect using the Docker Compose / Docker network service name "postgres",
+	// not "localhost" — inside a container, localhost means the container itself.
+	db, err = sql.Open("postgres", fmt.Sprintf("postgres://postgres:password@%s/todo?sslmode=disable", os.Getenv("DB_HOST")))
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -46,11 +46,12 @@ func TodoItems(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
 	}
 
 	// Get all rows and add into items
 	items := make([]ListItem, 0)
-	
+
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -59,6 +60,7 @@ func TodoItems(c *gin.Context) {
 			if err := rows.Scan(&item.Id, &item.Item, &item.Done); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				return
 			}
 			item.Item = strings.TrimSpace(item.Item)
 			items = append(items, item)
@@ -90,7 +92,7 @@ func CreateTodoItem(c *gin.Context) {
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-
+			return
 		}
 
 		// Log message
@@ -125,6 +127,7 @@ func UpdateTodoItem(c *gin.Context) {
 			if err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				return
 			}
 
 			// Log message
@@ -157,6 +160,7 @@ func DeleteTodoItem(c *gin.Context) {
 			if err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				return
 			}
 
 			// Log message

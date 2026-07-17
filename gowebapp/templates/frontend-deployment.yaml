@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gowebapp-frontend
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: gowebapp-frontend
+  template:
+    metadata:
+      labels:
+        app: gowebapp-frontend
+    spec:
+      containers:
+        - name: gowebapp-frontend
+          image: "{{ .Values.frontend.image }}:{{ .Values.frontend.tag }}"
+          ports:
+            - containerPort: {{ .Values.frontend.port }}

@@ -1,26 +1,24 @@
-FROM golang:alpine AS builder
+FROM golang:1.22-alpine AS builder
 
-RUN apk update && apk add --no-cache git 
+WORKDIR /app
 
-RUN mkdir /build
-
-WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . .
 
-RUN go mod download
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -installsuffix cgo -o /go/bin/build
+FROM alpine:3.20
 
+RUN apk add --no-cache ca-certificates bash
 
-FROM scratch
+WORKDIR /app
 
-COPY --from=builder /go/bin/build /go/bin/build
-COPY --from=builder /build/wait-for-it.sh ./wait-for-it.sh
-
-CMD ["chmod", "+x", "wait-for-it.sh"]
-CMD ["./wait-for-it.sh", "db:5432", "--"]
-
-ENTRYPOINT ["/go/bin/build"]
+COPY --from=builder /app/server .
+COPY --from=builder /app/wait-for-it.sh .
+RUN chmod +x wait-for-it.sh
 
 EXPOSE 8081
+
+ENTRYPOINT ["./wait-for-it.sh", "postgres:5432", "--", "./server"]

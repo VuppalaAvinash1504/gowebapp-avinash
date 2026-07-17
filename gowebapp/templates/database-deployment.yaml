@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gowebapp-database
+spec:
+  replicas: {{ .Values.database.replicas }}
+  selector:
+    matchLabels:
+      app: gowebapp-database
+  template:
+    metadata:
+      labels:
+        app: gowebapp-database
+    spec:
+      containers:
+        - name: gowebapp-database
+          image: "{{ .Values.database.image }}:{{ .Values.database.tag }}"
+          ports:
+            - containerPort: {{ .Values.database.port }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD

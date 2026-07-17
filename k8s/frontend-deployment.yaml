@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gowebapp-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gowebapp-frontend
+  template:
+    metadata:
+      labels:
+        app: gowebapp-frontend
+    spec:
+      containers:
+        - name: gowebapp-frontend
+          image: avinash1504/gowebapp-frontend:v1
+          ports:
+            - containerPort: 80

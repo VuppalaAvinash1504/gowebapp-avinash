@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: gowebapp-database
+  ports:
+    - port: {{ .Values.database.port }}
+      targetPort: {{ .Values.database.port }}

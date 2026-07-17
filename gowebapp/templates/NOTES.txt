@@ -1,0 +1,4 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Backend:  http://<node-ip>:{{ .Values.backend.port }}
+Frontend: http://<node-ip>:30080

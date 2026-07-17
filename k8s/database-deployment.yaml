@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gowebapp-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gowebapp-database
+  template:
+    metadata:
+      labels:
+        app: gowebapp-database
+    spec:
+      containers:
+        - name: gowebapp-database
+          image: avinash1504/gowebapp-database:v1
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD

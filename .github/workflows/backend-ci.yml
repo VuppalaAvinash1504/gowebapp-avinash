@@ -34,6 +34,10 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Vet code
+        working-directory: ./backend
+        run: go vet ./...
+
       - name: Set up database schema
         run: PGPASSWORD=password psql -h localhost -U postgres -d todo -f database/psql_dump.sql
         env:
@@ -56,4 +60,6 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: avinash1504/gowebapp-backend:${{ github.sha }}
+          tags: |
+            avinash1504/gowebapp-backend:${{ github.sha }}
+            avinash1504/gowebapp-backend:latest

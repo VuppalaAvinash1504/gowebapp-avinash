@@ -44,3 +44,4 @@ func main() {
 	router := SetupRoutes()
 	router.Run(":8081")
 }
+// CI test
